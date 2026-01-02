@@ -1,4 +1,0 @@
-Here is your completed debt payoff plan assuming total payments of $500 per month. Make the minimum payments on all debts except the first, and throw all your extra money at it until it is paid off, then continue down the list. You should be debt free in about 12 months.
-
-Name/description  Current balance  Annual Interest Rate  Minimum Monthly Payment  Months until Payoff  
-Visa              $5742.00         0.40%                 $100.00                  11.5                  
