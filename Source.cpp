@@ -6,6 +6,7 @@
 #include<algorithm>
 #include<vector>
 #include<sstream>
+#include<filesystem>
 using namespace std;
 
 struct Debt {
@@ -18,10 +19,10 @@ struct Debt {
 
 vector<Debt> getInput();
 double sumMinimumPayments(const vector<Debt>&);
-bool debtsMaintainable(const vector<Debt>& debts, double totalActualPayment);
+bool debtsMaintainable(const vector<Debt>&, double);
 void calculatePayoff(vector<Debt>&, double);
-double findLongestTime(const vector<Debt>&);
-int width(const vector<Debt>&, const vector<string>&);
+void writeDataFile(ofstream&, const vector<Debt>&, const vector<string>&, double);
+void printData(ifstream&);
 
 int main() {
 	vector<Debt> debts;
@@ -61,51 +62,14 @@ int main() {
 		}
 		calculatePayoff(debts, moneyForDebt);//calculates and adds the time to pay off each debt to the 2D vector
 
-		const int BALANCE_WIDTH = 17;
-		const int INTEREST_WIDTH = 22;
-		const int MIN_PAYMENT_WIDTH = 25;
-		const int TIME_WIDTH = 22;
-
-		ofstream file("Debt Payoff.txt");//create the output file
-		file << "Here is your completed debt payoff plan assuming total payments of $" << moneyForDebt << " per month. Make the minimum payments on all debts except the first, and throw all your extra money at it until it is paid off, then continue down the list. You should be debt free in about " << ceil(findLongestTime(debts)) << " months.\n\n";
-
-		for (int j = 0; j < columnLabels.size(); j++) {//Write the column labels to the file
-			if (j == 0) {
-				file << left << setw(width(debts, columnLabels) + 2) << columnLabels[j];//finds the widest value in the names column, and sets the width 2 spaces wider
-			}
-			else {
-				file << columnLabels[j] << "  ";//the rest of the column labels will be the widest element in their columns, so they only need two spaces between them
-			}
-		}
-		file << '\n';
-		for (const auto& debt : debts) {//this loop will write the table of data to the file
-			file << left << setw(width(debts, columnLabels) + 2) << debt.name;//write the debt names/descriptions to the file
-			ostringstream s;//stringstream object so symbols can be added to the numbers easily
-			s << "$" << fixed << setprecision(2) << debt.balance;
-			file << setw(BALANCE_WIDTH) << s.str();
-			s.clear();
-			s.str("");
-			s << debt.interestRate << "%";
-			file << setw(INTEREST_WIDTH) << s.str();
-			s.clear();
-			s.str("");
-			s << "$" << debt.minPayment;
-			file << setw(MIN_PAYMENT_WIDTH) << s.str();
-			s.clear();
-			s.str("");
-			s << setprecision(1) << debt.payoffTime;
-			file << setw(TIME_WIDTH) << s.str();
-			file << '\n';
-		}
-		file.close();
-
-		cout << "\nYour debt plan has been calculated, the following information has been written to a text file named \"Debt Payoff\":\n\n";
-
+		ofstream ofile("Debt Payoff.txt");//create the output file
+		writeDataFile(ofile, debts, columnLabels, moneyForDebt);
+		ofile.close();
 		ifstream ifile("Debt Payoff.txt");
-		string s;
-		while (getline(ifile, s)) {
-			cout << s << '\n';//prints the contents of the file
+		if (!ifile) {
+			throw runtime_error("Unable to open input file");
 		}
+		printData(ifile);
 		ifile.close();
 	}
 
@@ -254,10 +218,6 @@ void calculatePayoff(vector<Debt>& debts, double income) {
 	}
 }
 
-void PrintData() {
-
-}
-
 double findLongestTime(const vector<Debt>& debts) {
 	double longest = 0.0;
 	for (const auto& debt : debts) {
@@ -276,4 +236,52 @@ int width(const vector<Debt>& debts, const vector<string>& nameOfColumns) {//cal
 		}
 	}
 	return maxWidth;//returns the widest value
+}
+
+void writeDataFile(ofstream& file, const vector<Debt>& debts, const vector<string>& columnLabels, double totalPayment) {
+	const int NAME_WIDTH = width(debts, columnLabels) + 2;
+	const int BALANCE_WIDTH = 17;
+	const int INTEREST_WIDTH = 22;
+	const int MIN_PAYMENT_WIDTH = 25;
+	const int TIME_WIDTH = 22;
+
+	file << "Here is your completed debt payoff plan assuming total payments of $" << totalPayment << " per month. Make the minimum payments on all debts except the first, and throw all your extra money at it until it is paid off, then continue down the list. You should be debt free in about " << ceil(findLongestTime(debts)) << " months.\n\n";
+
+	for (int j = 0; j < columnLabels.size(); j++) {//Write the column labels to the file
+		if (j == 0) {
+			file << left << setw(NAME_WIDTH) << columnLabels[j];//finds the widest value in the names column, and sets the width 2 spaces wider
+		}
+		else {
+			file << columnLabels[j] << "  ";//the rest of the column labels will be the widest element in their columns, so they only need two spaces between them
+		}
+	}
+	file << '\n';
+	for (const auto& debt : debts) {//this loop will write the table of data to the file
+		file << left << setw(NAME_WIDTH) << debt.name;//write the debt names/descriptions to the file
+		ostringstream ss;//stringstream object so symbols can be added to the numbers easily
+		ss << "$" << fixed << setprecision(2) << debt.balance;
+		file << setw(BALANCE_WIDTH) << ss.str();
+		ss.clear();
+		ss.str("");
+		ss << debt.interestRate << "%";
+		file << setw(INTEREST_WIDTH) << ss.str();
+		ss.clear();
+		ss.str("");
+		ss << "$" << debt.minPayment;
+		file << setw(MIN_PAYMENT_WIDTH) << ss.str();
+		ss.clear();
+		ss.str("");
+		ss << setprecision(1) << debt.payoffTime;
+		file << setw(TIME_WIDTH) << ss.str();
+		file << '\n';
+	}
+}
+
+void printData(ifstream& file) {
+	cout << "\nYour debt plan has been calculated, the following information has been written to " << filesystem::current_path() / "Debt Payoff.txt" << ":\n\n";
+
+	string s;
+	while (getline(file, s)) {
+		cout << s << '\n';//prints the contents of the file
+	}
 }
