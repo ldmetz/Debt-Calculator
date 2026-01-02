@@ -9,11 +9,11 @@
 using namespace std;
 
 struct Debt {
-	string name;
-	double balance;
-	double interestRate;
-	double minPayment;
-	double payoffTime;
+	string name {};
+	double balance {};
+	double interestRate {};
+	double minPayment {};
+	double payoffTime {};
 };
 
 vector<Debt> getInput();
@@ -116,37 +116,44 @@ vector<Debt> getInput() {
 	vector<Debt> debts;
 
 	while (true) {
-		Debt debt;
+		string debtName;
+		double debtBalance;
+		double interestRate;
+		double minimumPayment;
+
 		cout << "Enter the name of a debt, or press Enter to quit and run the calculation: ";
-		getline(cin, debt.name);
-		if (debt.name == "") {
+		getline(cin, debtName);
+		if (debtName == "") {
 			break;
 		}
 
 		cout << "Enter the current debt balance: ";
-		while (!(cin >> debt.balance) || debt.balance <= 0.0) {
+		while (!(cin >> debtBalance) || debtBalance <= 0.0) {
 			cout << "Error, you must enter a number greater than 0.0. Try again: ";
 			cin.clear();
-			cin.ignore();
+			cin.ignore(1000, '\n');
 		}
 
 		cout << "Enter the annual interest rate on the debt: ";
-		while (!(cin >> debt.interestRate) || debt.interestRate < 0.0) {
+		while (!(cin >> interestRate) || interestRate < 0.0) {
 			cout << "Error, you must enter a non-negative number. Try again: ";
 			cin.clear();
-			cin.ignore();
+			cin.ignore(1000, '\n');
 		}
 
 		cout << "Enter the minimum monthly payment on the debt: ";
-		while (!(cin >> debt.minPayment) || debt.minPayment < 0.0) {
+		while (!(cin >> minimumPayment) || minimumPayment < 0.0) {
 			cout << "Error, you must enter a non-negative number. Try again: ";
 			cin.clear();
 			cin.ignore(1000, '\n');
 		}
 		cin.clear();
 		cin.ignore(1000, '\n');
+
+		Debt debt{ debtName, debtBalance, interestRate, minimumPayment };
 		debts.push_back(debt);
 	}
+
 	return debts;
 }
 

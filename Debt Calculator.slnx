@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="Debt Calculator.vcxproj" />
+  <Project Path="Debt Calculator.vcxproj" Id="63a69663-3d9d-435b-a09f-e2a6dbee33f3" />
 </Solution>
