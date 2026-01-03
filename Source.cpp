@@ -18,7 +18,9 @@ struct Debt {
 };
 
 vector<Debt> getInput();
-double sumMinimumPayments(const vector<Debt>&);
+double getTotalPayment(const vector<Debt>&);
+int getPayoffMethod();
+void sortDebts(vector<Debt>&, int);
 void calculatePayoff(vector<Debt>&, double);
 void writeDataFile(ofstream&, const vector<Debt>&, double);
 void printData(ifstream&);
@@ -32,52 +34,40 @@ int main() {
 	cout << "This program will create a personal debt payoff plan.\n";
 	debts = getInput();
 
-	//Get the total amount that the user plans to spend on debt payments
-	cout << "Enter the total monthly amount you can spend on debt payments: ";
-	while (!(cin >> totalPayment)) {
-		cout << "Incorrect input. You must enter a number (no $ sign): ";
-		cin.clear();
-		cin.ignore(1000, '\n');
+	try {
+		totalPayment = getTotalPayment(debts);
 	}
-
-	//Check if the user has enough money to meet the minimum payments
-	if (totalPayment < sumMinimumPayments(debts)) {
-		cout << "You do not have enough disposable income to meet your minimum payments. You need to find a way to make more money, or tighten your budget to only the essentials.";
+	catch(const runtime_error& e){
+		cout << e.what();
 		exit(0);
 	}
 
-	//Show the menu of debt payoff options
-	cout << "\nDebt payoff methods:\n1. Debt Snowball (smallest debt first)\n2. Debt Avalanche (highest interest rate first)\nEnter your selection: ";
-	while (!(cin >> payoffMethod) && (payoffMethod != 1 && payoffMethod != 2)) {
-		cout << "Invalid entry, you must enter either \"1\" or \"2\"";
-		cin.clear();
-		cin.ignore(1000, '\n');
-	}
+	//Get the payoff method
+	payoffMethod = getPayoffMethod();
 
-	//Sort the debt vector according to the selected payoff method
-	if (payoffMethod == 1) {
-		sort(debts.begin(), debts.end(), [&](Debt a, Debt b) {
-			return a.balance < b.balance;
-			});
-	}
-	else if(payoffMethod == 2) {
-		sort(debts.begin(), debts.end(), [&](Debt a, Debt b) {
-			return a.interestRate > b.interestRate;
-			});
-	}
+	//Sort the debt vector
+	sortDebts(debts, payoffMethod);
 
 	//Calculate the payoff time for all debts
-	calculatePayoff(debts, totalPayment);
+	try {
+		calculatePayoff(debts, totalPayment);
+	}
+	catch (const runtime_error& e) {
+		cout << e.what();
+		exit(0);
+	}
 
 	//Create the output file
 	ofstream ofile("Debt Payoff.txt");
 	writeDataFile(ofile, debts, totalPayment);
 	ofile.close();
 
+	//Open the file
 	ifstream ifile("Debt Payoff.txt");
 	if (!ifile) {
 		throw runtime_error("Unable to open input file");
 	}
+
 	//Print the data to the console
 	printData(ifile);
 	ifile.close();
@@ -137,15 +127,69 @@ vector<Debt> getInput() {
 }
 
 /**
-* Gets the total amount necessary to make minimum payments on all debts
+* Get the total amount the user plans to spend on debt and ensure it is enough to meet minimum payments
+* @return the total monthly payment on debt
 */
 
-double sumMinimumPayments(const vector<Debt> &debts) {
-	double total = 0.0;
-	for (const auto& debt : debts) {
-		total += debt.minPayment;
+double getTotalPayment(const vector<Debt>& debts) {
+	double totalPayment;
+	cout << "Enter the total monthly amount you can spend on debt payments: ";
+	while (!(cin >> totalPayment)) {
+		cout << "Incorrect input. You must enter a number (no $ sign): ";
+		cin.clear();
+		cin.ignore(1000, '\n');
 	}
-	return total;
+
+	double sumMinimumPayments = 0.0;
+	for (const auto& debt : debts) {
+		sumMinimumPayments += debt.minPayment;
+	}
+
+	//Check if the user has enough money to meet the minimum payments
+	if (totalPayment < sumMinimumPayments) {
+		throw runtime_error("You do not have enough disposable income to meet your minimum payments.");
+	}
+
+	return totalPayment;
+}
+
+/**
+* Get the payoff method
+* @return the user's chosen payoff method
+*/
+
+int getPayoffMethod() {
+	int payoffMethod;
+
+	//Show the menu of debt payoff options
+	cout << "\nDebt payoff methods:\n1. Debt Snowball (smallest debt first)\n2. Debt Avalanche (highest interest rate first)\nEnter your selection: ";
+	while (!(cin >> payoffMethod) && (payoffMethod != 1 && payoffMethod != 2)) {
+		cout << "Invalid entry, you must enter either \"1\" or \"2\": ";
+		cin.clear();
+		cin.ignore(1000, '\n');
+	}
+
+	return payoffMethod;
+}
+
+/**
+* Sorts the debts according to the selected payoff method
+*/
+
+void sortDebts(vector<Debt>& debts, int payoffMethod) {
+	//If debt snowball was selected, sort by ascending balance
+	if (payoffMethod == 1) {
+		sort(debts.begin(), debts.end(), [](const Debt& a, const Debt& b) {
+			return a.balance < b.balance;
+			});
+	}
+
+	//If debt avalanche was selected, sort be descending interest rate
+	else if (payoffMethod == 2) {
+		sort(debts.begin(), debts.end(), [](const Debt& a, const Debt& b) {
+			return a.interestRate > b.interestRate;
+			});
+	}
 }
 
 void calculatePayoff(vector<Debt>& debts, double totalPayment) {
@@ -201,6 +245,11 @@ void calculatePayoff(vector<Debt>& debts, double totalPayment) {
 		//If the target has moved past the end of the debt list, all debts have been paid off
 		if (target == debtPayoff.size()) {
 			allPaidOff = true;
+		}
+
+		//If the debt will take an unreasonable time to pay off at the current levels
+		if (months > 600) {
+			throw runtime_error("Unsustainable debt load. Your debt will take more than 50 years to pay off.");
 		}
 	}
 }
