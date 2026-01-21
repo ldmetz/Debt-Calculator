@@ -7,38 +7,37 @@
 #include<vector>
 #include<sstream>
 #include<filesystem>
-using namespace std;
 
 struct Debt {
-	string name {};
+	std::string name {};
 	double balance {};
 	double interestRate {};
 	double minPayment {};
 	int payoffTime { -1 };
 };
 
-vector<Debt> getInput();
-double getTotalPayment(const vector<Debt>&);
+std::vector<Debt> getInput();
+double getTotalPayment(const std::vector<Debt>&);
 int getPayoffMethod();
-void sortDebts(vector<Debt>&, int);
-void calculatePayoff(vector<Debt>&, double);
-void writeDataFile(ofstream&, const vector<Debt>&, double);
-void printData(ifstream&);
+void sortDebts(std::vector<Debt>&, int);
+void calculatePayoff(std::vector<Debt>&, double);
+void writeDataFile(std::ofstream&, const std::vector<Debt>&, double);
+void printData(std::ifstream&);
 
 int main() {
-	vector<Debt> debts; //The vector that will be used to store all debts
+	std::vector<Debt> debts; //The vector that will be used to store all debts
 	double totalPayment; //total monthly amount that will be spent to pay off debt
 	int payoffMethod;
 
 	//Gather the debt data
-	cout << "This program will create a personal debt payoff plan.\n";
+	std::cout << "This program will create a personal debt payoff plan.\n";
 	debts = getInput();
 
 	try {
 		totalPayment = getTotalPayment(debts);
 	}
-	catch(const runtime_error& e){
-		cout << e.what();
+	catch(const std::runtime_error& e){
+		std::cout << e.what();
 		exit(0);
 	}
 
@@ -52,20 +51,20 @@ int main() {
 	try {
 		calculatePayoff(debts, totalPayment);
 	}
-	catch (const runtime_error& e) {
-		cout << e.what();
+	catch (const std::runtime_error& e) {
+		std::cout << e.what();
 		exit(0);
 	}
 
 	//Create the output file
-	ofstream ofile("Debt Payoff.txt");
+	std::ofstream ofile("Debt Payoff.txt");
 	writeDataFile(ofile, debts, totalPayment);
 	ofile.close();
 
 	//Open the file
-	ifstream ifile("Debt Payoff.txt");
+	std::ifstream ifile("Debt Payoff.txt");
 	if (!ifile) {
-		throw runtime_error("Unable to open input file");
+		throw std::runtime_error("Unable to open input file");
 	}
 
 	//Print the data to the console
@@ -80,44 +79,44 @@ int main() {
 * @return a vector of Debt objects
 */
 
-vector<Debt> getInput() {
-	vector<Debt> debts;
+std::vector<Debt> getInput() {
+	std::vector<Debt> debts;
 
 	while (true) {
-		string debtName;
+		std::string debtName;
 		double debtBalance;
 		double interestRate;
 		double minimumPayment;
 
-		cout << "Enter the name of a debt, or press Enter to quit and run the calculation: ";
-		getline(cin, debtName);
+		std::cout << "Enter the name of a debt, or press Enter to quit and run the calculation: ";
+		getline(std::cin, debtName);
 
 		if (debtName == "") {
 			break;
 		}
 
-		cout << "Enter the current debt balance: ";
-		while (!(cin >> debtBalance) || debtBalance <= 0.0) {
-			cout << "Error, you must enter a number greater than 0.0. Try again: ";
-			cin.clear();
-			cin.ignore(1000, '\n');
+		std::cout << "Enter the current debt balance: ";
+		while (!(std::cin >> debtBalance) || debtBalance <= 0.0) {
+			std::cout << "Error, you must enter a number greater than 0.0. Try again: ";
+			std::cin.clear();
+			std::cin.ignore(1000, '\n');
 		}
 
-		cout << "Enter the annual interest rate on the debt: ";
-		while (!(cin >> interestRate) || interestRate < 0.0) {
-			cout << "Error, you must enter a non-negative number. Try again: ";
-			cin.clear();
-			cin.ignore(1000, '\n');
+		std::cout << "Enter the annual interest rate on the debt: ";
+		while (!(std::cin >> interestRate) || interestRate < 0.0) {
+			std::cout << "Error, you must enter a non-negative number. Try again: ";
+			std::cin.clear();
+			std::cin.ignore(1000, '\n');
 		}
 
-		cout << "Enter the minimum monthly payment on the debt: ";
-		while (!(cin >> minimumPayment) || minimumPayment < 0.0) {
-			cout << "Error, you must enter a non-negative number. Try again: ";
-			cin.clear();
-			cin.ignore(1000, '\n');
+		std::cout << "Enter the minimum monthly payment on the debt: ";
+		while (!(std::cin >> minimumPayment) || minimumPayment < 0.0) {
+			std::cout << "Error, you must enter a non-negative number. Try again: ";
+			std::cin.clear();
+			std::cin.ignore(1000, '\n');
 		}
-		cin.clear();
-		cin.ignore(1000, '\n');
+		std::cin.clear();
+		std::cin.ignore(1000, '\n');
 
 		Debt debt{ debtName, debtBalance, interestRate, minimumPayment };
 		debts.push_back(debt);
@@ -131,13 +130,13 @@ vector<Debt> getInput() {
 * @return the total monthly payment on debt
 */
 
-double getTotalPayment(const vector<Debt>& debts) {
+double getTotalPayment(const std::vector<Debt>& debts) {
 	double totalPayment;
-	cout << "Enter the total monthly amount you can spend on debt payments: ";
-	while (!(cin >> totalPayment)) {
-		cout << "Incorrect input. You must enter a number (no $ sign): ";
-		cin.clear();
-		cin.ignore(1000, '\n');
+	std::cout << "Enter the total monthly amount you can spend on debt payments: ";
+	while (!(std::cin >> totalPayment)) {
+		std::cout << "Incorrect input. You must enter a number (no $ sign): ";
+		std::cin.clear();
+		std::cin.ignore(1000, '\n');
 	}
 
 	double sumMinimumPayments = 0.0;
@@ -147,7 +146,7 @@ double getTotalPayment(const vector<Debt>& debts) {
 
 	//Check if the user has enough money to meet the minimum payments
 	if (totalPayment < sumMinimumPayments) {
-		throw runtime_error("You do not have enough disposable income to meet your minimum payments.");
+		throw std::runtime_error("You do not have enough disposable income to meet your minimum payments.");
 	}
 
 	return totalPayment;
@@ -162,11 +161,11 @@ int getPayoffMethod() {
 	int payoffMethod;
 
 	//Show the menu of debt payoff options
-	cout << "\nDebt payoff methods:\n1. Debt Snowball (smallest debt first)\n2. Debt Avalanche (highest interest rate first)\nEnter your selection: ";
-	while (!(cin >> payoffMethod) && (payoffMethod != 1 && payoffMethod != 2)) {
-		cout << "Invalid entry, you must enter either \"1\" or \"2\": ";
-		cin.clear();
-		cin.ignore(1000, '\n');
+	std::cout << "\nDebt payoff methods:\n1. Debt Snowball (smallest debt first)\n2. Debt Avalanche (highest interest rate first)\nEnter your selection: ";
+	while (!(std::cin >> payoffMethod) && (payoffMethod != 1 && payoffMethod != 2)) {
+		std::cout << "Invalid entry, you must enter either \"1\" or \"2\": ";
+		std::cin.clear();
+		std::cin.ignore(1000, '\n');
 	}
 
 	return payoffMethod;
@@ -176,25 +175,25 @@ int getPayoffMethod() {
 * Sorts the debts according to the selected payoff method
 */
 
-void sortDebts(vector<Debt>& debts, int payoffMethod) {
+void sortDebts(std::vector<Debt>& debts, int payoffMethod) {
 	//If debt snowball was selected, sort by ascending balance
 	if (payoffMethod == 1) {
-		sort(debts.begin(), debts.end(), [](const Debt& a, const Debt& b) {
+		std::sort(debts.begin(), debts.end(), [](const Debt& a, const Debt& b) {
 			return a.balance < b.balance;
 			});
 	}
 
 	//If debt avalanche was selected, sort be descending interest rate
 	else if (payoffMethod == 2) {
-		sort(debts.begin(), debts.end(), [](const Debt& a, const Debt& b) {
+		std::sort(debts.begin(), debts.end(), [](const Debt& a, const Debt& b) {
 			return a.interestRate > b.interestRate;
 			});
 	}
 }
 
-void calculatePayoff(vector<Debt>& debts, double totalPayment) {
+void calculatePayoff(std::vector<Debt>& debts, double totalPayment) {
 	int months = 0;
-	vector<Debt> debtPayoff(debts); //A vector to simulate debt paydown without modifying the original balances
+	std::vector<Debt> debtPayoff(debts); //A vector to simulate debt paydown without modifying the original balances
 	int target = 0; //The index value of the debt to target with all extra funds
 	bool allPaidOff = false;
 
@@ -208,7 +207,7 @@ void calculatePayoff(vector<Debt>& debts, double totalPayment) {
 				continue;
 			}
 			debt.balance += debt.balance * (debt.interestRate / 1200.0);
-			double payment = min(debt.balance, debt.minPayment);
+			double payment = std::min(debt.balance, debt.minPayment);
 			totalAvailable -= payment;
 			debt.balance -= payment;
 		}
@@ -221,7 +220,7 @@ void calculatePayoff(vector<Debt>& debts, double totalPayment) {
 				continue;
 			}
 
-			double payment = min(targetDebt.balance, totalAvailable);
+			double payment = std::min(targetDebt.balance, totalAvailable);
 			totalAvailable -= payment;
 			targetDebt.balance -= payment;
 
@@ -249,7 +248,7 @@ void calculatePayoff(vector<Debt>& debts, double totalPayment) {
 
 		//If the debt will take an unreasonable time to pay off at the current levels
 		if (months > 600) {
-			throw runtime_error("Unsustainable debt load. Your debt will take more than 50 years to pay off.");
+			throw std::runtime_error("Unsustainable debt load. Your debt will take more than 50 years to pay off.");
 		}
 	}
 }
@@ -259,7 +258,7 @@ void calculatePayoff(vector<Debt>& debts, double totalPayment) {
 * @return the number of months to pay off all debts
 */
 
-int findLongestTime(const vector<Debt>& debts) {
+int findLongestTime(const std::vector<Debt>& debts) {
 	int longest = 0;
 	for (const auto& debt : debts) {
 		if (debt.payoffTime > longest) {
@@ -274,7 +273,7 @@ int findLongestTime(const vector<Debt>& debts) {
 * @return the width of the widest element in the column
 */
 
-int width(const vector<Debt>& debts, const vector<string>& nameOfColumns) {
+int width(const std::vector<Debt>& debts, const std::vector<std::string>& nameOfColumns) {
 	int maxWidth = nameOfColumns[0].size();
 
 	//See if there are any debt names that are wider than the column label
@@ -290,8 +289,8 @@ int width(const vector<Debt>& debts, const vector<string>& nameOfColumns) {
 * Writes the debt payoff timeline to a text file
 */
 
-void writeDataFile(ofstream& file, const vector<Debt>& debts, double totalPayment) {
-	const vector<string> columnLabels = { "Name/description", "Current balance", "Annual Interest Rate", "Minimum Monthly Payment", "Months until Payoff" };
+void writeDataFile(std::ofstream& file, const std::vector<Debt>& debts, double totalPayment) {
+	const std::vector<std::string> columnLabels { "Name/description", "Current balance", "Annual Interest Rate", "Minimum Monthly Payment", "Months until Payoff" };
 
 	const int NAME_WIDTH = width(debts, columnLabels) + 2;
 	const int BALANCE_WIDTH = 17;
@@ -304,7 +303,7 @@ void writeDataFile(ofstream& file, const vector<Debt>& debts, double totalPaymen
 	//Write the column labels to the file
 	for (int j = 0; j < columnLabels.size(); j++) {
 		if (j == 0) {
-			file << left << setw(NAME_WIDTH) << columnLabels[j];
+			file << std::left << std::setw(NAME_WIDTH) << columnLabels[j];
 		}
 		else {
 			file << columnLabels[j] << "  ";
@@ -314,26 +313,26 @@ void writeDataFile(ofstream& file, const vector<Debt>& debts, double totalPaymen
 
 	//Write the debt data to the file
 	for (const auto& debt : debts) {
-		file << left << setw(NAME_WIDTH) << debt.name;
+		file << std::left << std::setw(NAME_WIDTH) << debt.name;
 
-		ostringstream ss;
-		ss << "$" << fixed << setprecision(2) << debt.balance;
-		file << setw(BALANCE_WIDTH) << ss.str();
+		std::ostringstream ss;
+		ss << "$" << std::fixed << std::setprecision(2) << debt.balance;
+		file << std::setw(BALANCE_WIDTH) << ss.str();
 		ss.clear();
 		ss.str("");
 
 		ss << debt.interestRate << "%";
-		file << setw(INTEREST_WIDTH) << ss.str();
+		file << std::setw(INTEREST_WIDTH) << ss.str();
 		ss.clear();
 		ss.str("");
 
 		ss << "$" << debt.minPayment;
-		file << setw(MIN_PAYMENT_WIDTH) << ss.str();
+		file << std::setw(MIN_PAYMENT_WIDTH) << ss.str();
 		ss.clear();
 		ss.str("");
 
 		ss << debt.payoffTime;
-		file << setw(TIME_WIDTH) << ss.str();
+		file << std::setw(TIME_WIDTH) << ss.str();
 		file << '\n';
 	}
 }
@@ -342,11 +341,11 @@ void writeDataFile(ofstream& file, const vector<Debt>& debts, double totalPaymen
 * Prints the data from the file
 */
 
-void printData(ifstream& file) {
-	cout << "\nYour debt plan has been calculated, the following information has been written to " << filesystem::current_path() / "Debt Payoff.txt" << ":\n\n";
+void printData(std::ifstream& file) {
+	std::cout << "\nYour debt plan has been calculated, the following information has been written to " << std::filesystem::current_path() / "Debt Payoff.txt" << ":\n\n";
 
-	string s;
-	while (getline(file, s)) {
-		cout << s << '\n';
+	std::string s;
+	while (std::getline(file, s)) {
+		std::cout << s << '\n';
 	}
 }
