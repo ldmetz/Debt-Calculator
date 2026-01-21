@@ -25,14 +25,13 @@ void writeDataFile(std::ofstream&, const std::vector<Debt>&, double);
 void printData(std::ifstream&);
 
 int main() {
-	std::vector<Debt> debts; //The vector that will be used to store all debts
-	double totalPayment; //total monthly amount that will be spent to pay off debt
-	int payoffMethod;
+	std::cout << "This program will create a personal debt payoff plan.\n";
 
 	//Gather the debt data
-	std::cout << "This program will create a personal debt payoff plan.\n";
+	std::vector<Debt> debts; //The vector that will be used to store all debts
 	debts = getInput();
 
+	double totalPayment; //total monthly amount that will be spent to pay off debt
 	try {
 		totalPayment = getTotalPayment(debts);
 	}
@@ -42,6 +41,7 @@ int main() {
 	}
 
 	//Get the payoff method
+	int payoffMethod;
 	payoffMethod = getPayoffMethod();
 
 	//Sort the debt vector
@@ -115,6 +115,7 @@ std::vector<Debt> getInput() {
 			std::cin.clear();
 			std::cin.ignore(1000, '\n');
 		}
+
 		std::cin.clear();
 		std::cin.ignore(1000, '\n');
 
@@ -161,7 +162,11 @@ int getPayoffMethod() {
 	int payoffMethod;
 
 	//Show the menu of debt payoff options
-	std::cout << "\nDebt payoff methods:\n1. Debt Snowball (smallest debt first)\n2. Debt Avalanche (highest interest rate first)\nEnter your selection: ";
+	std::cout << "\nDebt payoff methods:\n"
+		<< "1. Debt Snowball (smallest debt first)\n"
+		<< "2. Debt Avalanche (highest interest rate first)\n"
+		<< "Enter your selection : ";
+
 	while (!(std::cin >> payoffMethod) && (payoffMethod != 1 && payoffMethod != 2)) {
 		std::cout << "Invalid entry, you must enter either \"1\" or \"2\": ";
 		std::cin.clear();
@@ -178,14 +183,14 @@ int getPayoffMethod() {
 void sortDebts(std::vector<Debt>& debts, int payoffMethod) {
 	//If debt snowball was selected, sort by ascending balance
 	if (payoffMethod == 1) {
-		std::sort(debts.begin(), debts.end(), [](const Debt& a, const Debt& b) {
+		sort(debts.begin(), debts.end(), [](const Debt& a, const Debt& b) {
 			return a.balance < b.balance;
 			});
 	}
 
 	//If debt avalanche was selected, sort be descending interest rate
 	else if (payoffMethod == 2) {
-		std::sort(debts.begin(), debts.end(), [](const Debt& a, const Debt& b) {
+		sort(debts.begin(), debts.end(), [](const Debt& a, const Debt& b) {
 			return a.interestRate > b.interestRate;
 			});
 	}
@@ -342,10 +347,11 @@ void writeDataFile(std::ofstream& file, const std::vector<Debt>& debts, double t
 */
 
 void printData(std::ifstream& file) {
-	std::cout << "\nYour debt plan has been calculated, the following information has been written to " << std::filesystem::current_path() / "Debt Payoff.txt" << ":\n\n";
+	std::cout << "\nYour debt plan has been calculated, the following information has been written to "
+		<< std::filesystem::current_path() / "Debt Payoff.txt" << ":\n\n";
 
 	std::string s;
-	while (std::getline(file, s)) {
+	while (getline(file, s)) {
 		std::cout << s << '\n';
 	}
 }
