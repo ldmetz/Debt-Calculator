@@ -38,7 +38,7 @@ int main() {
 	}
 	catch(const std::runtime_error& e){
 		std::cout << e.what();
-		exit(0);
+		return 0;
 	}
 
 	//Get the payoff method
