@@ -280,12 +280,12 @@ int findLongestTime(const std::vector<Debt>& debts) {
 */
 
 int width(const std::vector<Debt>& debts, const std::vector<std::string>& nameOfColumns) {
-	int maxWidth{ nameOfColumns[0].size() };
+	int maxWidth{ static_cast<int>(nameOfColumns[0].size()) };
 
 	//See if there are any debt names that are wider than the column label
 	for (const auto& d : debts) {
 		if (d.name.length() > maxWidth) {
-			maxWidth = d.name.length();
+			maxWidth = static_cast<int>(d.name.length());
 		}
 	}
 	return maxWidth;
