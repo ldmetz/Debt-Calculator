@@ -1,19 +1,20 @@
-#include<iostream>
-#include<iomanip>
-#include<cmath>
-#include<fstream>
-#include<string>
-#include<algorithm>
-#include<vector>
-#include<sstream>
-#include<filesystem>
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+#include <string>
+#include <algorithm>
+#include <vector>
+#include <sstream>
+#include <filesystem>
+#include <cstdlib>
+#include <stdexcept>
 
 struct Debt {
-	std::string name {};
-	double balance {};
-	double interestRate {};
-	double minPayment {};
-	int payoffTime { -1 };
+	std::string name{};
+	double balance{};
+	double interestRate{};
+	double minPayment{};
+	int payoffTime{ -1 };
 };
 
 std::vector<Debt> getInput();
@@ -89,7 +90,7 @@ std::vector<Debt> getInput() {
 		double minimumPayment;
 
 		std::cout << "Enter the name of a debt, or press Enter to quit and run the calculation: ";
-		getline(std::cin, debtName);
+		std::getline(std::cin, debtName);
 
 		if (debtName == "") {
 			break;
@@ -140,7 +141,7 @@ double getTotalPayment(const std::vector<Debt>& debts) {
 		std::cin.ignore(1000, '\n');
 	}
 
-	double sumMinimumPayments = 0.0;
+	double sumMinimumPayments{ 0.0 };
 	for (const auto& debt : debts) {
 		sumMinimumPayments += debt.minPayment;
 	}
@@ -183,28 +184,28 @@ int getPayoffMethod() {
 void sortDebts(std::vector<Debt>& debts, int payoffMethod) {
 	//If debt snowball was selected, sort by ascending balance
 	if (payoffMethod == 1) {
-		sort(debts.begin(), debts.end(), [](const Debt& a, const Debt& b) {
+		std::sort(debts.begin(), debts.end(), [](const Debt& a, const Debt& b) {
 			return a.balance < b.balance;
 			});
 	}
 
 	//If debt avalanche was selected, sort be descending interest rate
 	else if (payoffMethod == 2) {
-		sort(debts.begin(), debts.end(), [](const Debt& a, const Debt& b) {
+		std::sort(debts.begin(), debts.end(), [](const Debt& a, const Debt& b) {
 			return a.interestRate > b.interestRate;
 			});
 	}
 }
 
 void calculatePayoff(std::vector<Debt>& debts, double totalPayment) {
-	int months = 0;
+	int months{ 0 };
 	std::vector<Debt> debtPayoff(debts); //A vector to simulate debt paydown without modifying the original balances
 	int target = 0; //The index value of the debt to target with all extra funds
-	bool allPaidOff = false;
+	bool allPaidOff{ false };
 
 	while (!allPaidOff) {
 		months++;
-		double totalAvailable = totalPayment;
+		double totalAvailable{ totalPayment };
 
 		//Add interest and make minimum payments on all debts
 		for (auto& debt : debtPayoff) {
@@ -219,7 +220,7 @@ void calculatePayoff(std::vector<Debt>& debts, double totalPayment) {
 
 		//Apply the remaining available money towards the other debts
 		for (int i = target; i < debtPayoff.size(); i++) {
-			Debt& targetDebt = debtPayoff[i];
+			Debt& targetDebt{ debtPayoff[i] };
 
 			if (targetDebt.balance <= 1e-9) {
 				continue;
@@ -264,7 +265,7 @@ void calculatePayoff(std::vector<Debt>& debts, double totalPayment) {
 */
 
 int findLongestTime(const std::vector<Debt>& debts) {
-	int longest = 0;
+	int longest{ 0 };
 	for (const auto& debt : debts) {
 		if (debt.payoffTime > longest) {
 			longest = debt.payoffTime;
@@ -279,7 +280,7 @@ int findLongestTime(const std::vector<Debt>& debts) {
 */
 
 int width(const std::vector<Debt>& debts, const std::vector<std::string>& nameOfColumns) {
-	int maxWidth = nameOfColumns[0].size();
+	int maxWidth{ nameOfColumns[0].size() };
 
 	//See if there are any debt names that are wider than the column label
 	for (const auto& d : debts) {
@@ -297,11 +298,11 @@ int width(const std::vector<Debt>& debts, const std::vector<std::string>& nameOf
 void writeDataFile(std::ofstream& file, const std::vector<Debt>& debts, double totalPayment) {
 	const std::vector<std::string> columnLabels { "Name/description", "Current balance", "Annual Interest Rate", "Minimum Monthly Payment", "Months until Payoff" };
 
-	const int NAME_WIDTH = width(debts, columnLabels) + 2;
-	const int BALANCE_WIDTH = 17;
-	const int INTEREST_WIDTH = 22;
-	const int MIN_PAYMENT_WIDTH = 25;
-	const int TIME_WIDTH = 22;
+	const int NAME_WIDTH{ width(debts, columnLabels) + 2 };
+	const int BALANCE_WIDTH{ 17 };
+	const int INTEREST_WIDTH{ 22 };
+	const int MIN_PAYMENT_WIDTH{ 25 };
+	const int TIME_WIDTH{ 22 };
 
 	file << "Here is your completed debt payoff plan assuming total payments of $" << totalPayment << " per month. Make the minimum payments on all debts except the first, and throw all your extra money at it until it is paid off, then continue down the list. You should be debt free in about " << findLongestTime(debts) << " months.\n\n";
 
@@ -351,7 +352,7 @@ void printData(std::ifstream& file) {
 		<< std::filesystem::current_path() / "Debt Payoff.txt" << ":\n\n";
 
 	std::string s;
-	while (getline(file, s)) {
+	while (std::getline(file, s)) {
 		std::cout << s << '\n';
 	}
 }
