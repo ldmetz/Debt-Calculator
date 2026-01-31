@@ -120,8 +120,7 @@ std::vector<Debt> getInput() {
 		std::cin.clear();
 		std::cin.ignore(1000, '\n');
 
-		Debt debt{ debtName, debtBalance, interestRate, minimumPayment };
-		debts.push_back(debt);
+		debts.push_back(Debt { debtName, debtBalance, interestRate, minimumPayment });
 	}
 
 	return debts;
